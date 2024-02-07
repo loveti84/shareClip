@@ -13,6 +13,8 @@ class client:
         if connection:
             self.connection=connection
             self.isConnected = True
+            return True
+        return False
 
     def recv(self):
         try:

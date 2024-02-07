@@ -88,12 +88,13 @@ def interFace():
 
     ip_label = tk.Label(entrygrid, text="IP address:")
     ip_label.grid(row=0,column=0,sticky='W')
-    '04:7F:0E:7D:D0:D9'
+
+
     ip_entry = tk.Entry(entrygrid)
+    #ip_entry.insert(0, '04:7F:0E:7D:D0:D9')  # Default IP address
+
     ip_entry.insert(0, "D0:39:57:F1:E7:92")  # Default IP address
     ip_entry.grid(row=0,column=1)
-
-
     portlabel = tk.Label(entrygrid, text="port:")
     portlabel.grid(row=1,column=0,sticky='W')
 
@@ -196,10 +197,13 @@ def run(ip, host, port):
     else:
         while True:
             try:
-                conn = Server.connect(ip, port)
-                ConnectionClient.setConnection(conn)
-                items['name_var'].set("Connected")
-                break
+                conn = Server.connect("", port)
+                ok=ConnectionClient.setConnection(conn)
+                if ok:
+                    items['name_var'].set("Connected")
+                    break
+                else:
+                    print('failed,again')
             except:
                 print("cant connect with the server")
 

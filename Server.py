@@ -21,11 +21,12 @@ class socketServer:
 
     def setstatus(self,mes):
         self.status=mes
+        print(self.status)
 
     def startServer(self,SERVER_IP,PORT):
-        self.server_socket.bind(("", PORT))
+        self.server_socket.bind((SERVER_IP, PORT))
         self.server_socket.listen(1)
-        print("listening")
+        self.setstatus("listening")
 
     def getClientConnection(self):
         return self.connections.keys()
@@ -43,7 +44,9 @@ def connect(ip,port)->socket.socket():
         while 1:
             try:
                 sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM,socket.BTPROTO_RFCOMM)
-                sock.connect((ip, port))
+                sock.connect(("", port))
+                print("client connected")
+
                 break
             except:
                 print("Could Establish connection with server, trying again")
