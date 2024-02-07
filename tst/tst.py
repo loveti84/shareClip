@@ -1,4 +1,6 @@
 import socket
+import threading
+
 
 # Bluetooth address of the receiving device
 def server(target_address,port):
@@ -7,22 +9,16 @@ def server(target_address,port):
     # Create a Bluetooth socket
     client_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
-    try:
-        # Connect to the target device
-        client_socket.connect((target_address, port))
-        print("Connected to", target_address)
+    # Connect to the target device
+    client_socket.connect((target_address, port))
+    print("Connected to", target_address)
 
-        # Send data
-        message = "Hello, world!"
-        client_socket.sendall(message.encode())
-        print("Sent:", message)
+    # Send data
+    message = "Hello, world!"
+    client_socket.send(message.encode())
+    print("Sent:", message)
 
-        data = client_socket.recv(1024)
-        print("Received:", data.decode())
-
-    finally:
-        # Close the socket
-        client_socket.close()
+    return  client_socket
 
 def client(target_address,port):
 
@@ -41,10 +37,21 @@ def client(target_address,port):
     client_socket, address = server_socket.accept()
     print("Accepted connection from", address)
 
-    # Receive data
-    data = client_socket.recv(1024)
-    print("Received:", data.decode())
+    return client_socket
 
-target_address = "D0:39:57:F1:E7:92"
-#target_address = "04:7F:0E:7D:D0:D9"
-server(target_address,2)
+
+
+def l(s):
+    while 1:
+# Receive data
+        data = s.recv(1024)
+        print("Received:", data.decode())
+
+#target_address = "D0:39:57:F1:E7:92"
+target_address = "04:7F:0E:7D:D0:D9"
+s=client(target_address,1)
+t=threading.Thread(target=lambda :l(s))
+t.start()
+while 1:
+    i=input()
+    s.send(i.encode())
