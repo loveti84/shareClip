@@ -99,7 +99,7 @@ def interFace():
     portlabel.grid(row=1,column=0,sticky='W')
 
     port_entry = tk.Entry(entrygrid)
-    port_entry.insert(0, "2")  # Default IP address
+    port_entry.insert(0, "8")  # Default IP address
     port_entry.grid(row=1,column=1)
 
     host_var = tk.BooleanVar()
