@@ -13,9 +13,8 @@ lock = threading.Lock()
 DEBUG=False
 class shareClyp:
 
-    def __init__(self, connection):
-        self.client=client.client(connection)
-        self.connection =connection
+    def __init__(self, client):
+        self.connection =client.connection
         self.loop=True
         self.run()
 

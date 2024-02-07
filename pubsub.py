@@ -1,3 +1,5 @@
+
+
 events={}
 def createEvent(name):
     events[name]=[]
@@ -7,6 +9,13 @@ def setEvent(name,*args):
     else:
         events[name]=list(args)
 
+
+def addPublisher(event,func,repeat=False):
+    while 1:
+        func()
+        invoke(event)
+        if not repeat:
+            break
 
 def invoke(name,*args):
     dic={}

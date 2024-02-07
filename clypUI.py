@@ -9,13 +9,12 @@ from tkinter import filedialog
 from tkinter import ttk
 
 import pyperclip
-
+from event import Event
 import clipboardHistory
 import client
 import Server
 import shareClyp
 from pynput import keyboard
-
 import fileSender, pubsub
 folder_path =None
 items = {}
@@ -89,7 +88,7 @@ def interFace():
 
     ip_label = tk.Label(entrygrid, text="IP address:")
     ip_label.grid(row=0,column=0,sticky='W')
-
+    '04:7F:0E:7D:D0:D9'
     ip_entry = tk.Entry(entrygrid)
     ip_entry.insert(0, "D0:39:57:F1:E7:92")  # Default IP address
     ip_entry.grid(row=0,column=1)
@@ -99,7 +98,7 @@ def interFace():
     portlabel.grid(row=1,column=0,sticky='W')
 
     port_entry = tk.Entry(entrygrid)
-    port_entry.insert(0, "1")  # Default IP address
+    port_entry.insert(0, "2")  # Default IP address
     port_entry.grid(row=1,column=1)
 
     host_var = tk.BooleanVar()
@@ -162,11 +161,13 @@ def interFace():
     not_var.set("")
     not_label = tk.Label(window, textvariable=not_var)
     not_label.pack()
-
+    """
     pubsub.setEvent('recieving', lambda: not_var.set("Recieving File"))
     pubsub.setEvent('recieved', lambda: not_var.set("File Recieved at " + datetime.now().strftime("%H:%M:%S")))
     pubsub.setEvent('sending', lambda: not_var.set("Sending File"))
     pubsub.setEvent('sended', lambda: not_var.set("sended at" + datetime.now().strftime("%H:%M:%S")))
+    
+    """
     window.mainloop()
 
 
@@ -181,34 +182,32 @@ def on_closing(root):
 
 
 def run(ip, host, port):
-    s, fileServer = None, None
+    s, conn = None, None
     tracemalloc.start()
+    ConnectionClient = client.client()
+
     if host:
         s = Server.socketServer(ip, port, wait=True)
-        fs= Server.socketServer(ip, port+2, wait=True)
-        closefunc.append(s.stopServer)
-        closefunc.append(fs.stopServer)
-        textClient = Server.connect(ip, port)
-        fileClient = Server.connect(ip, port+2)
-        t = threading.Thread(target=lambda: connectionhandler(s, lambda :shareClyp.shareClyp(textClient)))
-        t.start()
-        t = threading.Thread(target=lambda: connectionhandler(fs, lambda :fileSender.filesender(fileClient)))
-        t.start()
+        pubsub.addPublisher(Event.CONNECTED)
+        pubsub.setEvent(Event.CONNECTED,lambda : ConnectionClient.setConnection(s.connection))
+        #closefunc.append(s.stopServer)
+        #t = threading.Thread(target=lambda: connectionhandler(s, lambda :shareClyp.shareClyp(textClient)))
+        #t.start()
     else:
         while True:
             try:
-                textClient1 = Server.connect(ip, port)
-                fileClient = Server.connect(ip, port + 2)
+                conn = Server.connect(ip, port)
+                ConnectionClient.setConnection(conn)
                 items['name_var'].set("Connected")
                 break
             except:
                 print("cant connect with the server")
 
         items['name_var'].set("Connected")
-        sc=shareClyp.shareClyp(textClient1)
-        fc=fileSender.filesender(fileClient)
-        closefunc.append(textClient1.close)
-        closefunc.append(fileClient.close)
+        sc=shareClyp.shareClyp(ConnectionClient)
+        #fc=fileSender.filesender(fileClient)
+        #closefunc.append(textClient1.close)
+        #closefunc.append(fileClient.close)
 
 def connectionhandler(s, initf):
     while True:

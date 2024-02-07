@@ -2,17 +2,17 @@ import asyncio
 import socket
 import threading
 from copy import deepcopy
-
+#pip install git+https://github.com/pybluez/pybluez.git#egg=pybluez
 class client:
     def __init__(self,connection=None):
         self.isConnected=False
-        self._event=threading.Event
-        if connection==None:
-            self.connection=self.connect()
-            self.isConnected = True
-        else:
-            self.connection=connection
+        self.connection = None
+        self.setConnection(connection)
 
+    def setConnection(self,connection):
+        if connection:
+            self.connection=connection
+            self.isConnected = True
 
     def recv(self):
         try:
