@@ -1,4 +1,4 @@
-import socket
+import bluetooth
 import threading
 import shareClyp
 
@@ -6,7 +6,7 @@ import shareClyp
 class socketServer:
 
     def __init__(self,SERVER_IP,PORT,wait=False):
-        self.server_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM,socket.BTPROTO_RFCOMM)
+        self.server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.wait=wait
         self.connections={}
         self.isConnected=False
@@ -24,7 +24,7 @@ class socketServer:
         print(self.status)
 
     def startServer(self,SERVER_IP,PORT):
-        self.server_socket.bind((SERVER_IP, PORT))
+        self.server_socket.bind(('', PORT))
         self.server_socket.listen(1)
         self.setstatus("listening")
 
@@ -40,10 +40,10 @@ class socketServer:
                 conn,adrr=self.server_socket.accept()
                 self.connection=conn
 
-def connect(ip,port)->socket.socket():
+def connect(ip,port)->bluetooth.BluetoothSocket():
         while 1:
             try:
-                sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM,socket.BTPROTO_RFCOMM)
+                sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
                 sock.connect((ip, port))
                 print("client connected")
 
