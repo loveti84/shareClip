@@ -38,10 +38,24 @@ class socketServer:
     def connectionListener(self):#server listen for client
         while 1:
                 conn,adrr=self.server_socket.accept()
-                print(conn)
-                if conn:
+                print('x',conn)
+                if conn is not None:
                     break
         self.connection=conn
+        print('end')
+
+def initiqte(ip,PORT):
+    server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+    server_socket.bind(('', PORT))
+    server_socket.listen(1)
+    print("listening")
+
+    while 1:
+        conn, adrr = server_socket.accept()
+        print('x', conn,adrr)
+        if conn is not None:
+            break
+    return conn
 
 def connect(ip,port)->bluetooth.BluetoothSocket():
         while 1:
@@ -49,7 +63,7 @@ def connect(ip,port)->bluetooth.BluetoothSocket():
                 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
                 sock.connect((ip, port))
                 print("client connected")
-                if sock:
+                if sock is not None:
                     break
                 else:
                     print("Could Establish connection with server, trying again")

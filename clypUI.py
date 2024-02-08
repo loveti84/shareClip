@@ -16,9 +16,11 @@ import Server
 import shareClyp
 from pynput import keyboard
 import fileSender, pubsub
-folder_path =None
+
+folder_path = None
 items = {}
-closefunc=[]
+closefunc = []
+
 
 def display_history():
     # Create a new window
@@ -29,11 +31,10 @@ def display_history():
 
     def display_full_text(textfield):
         textfield.configure(state=tk.NORMAL)
-        selected_item = tree.focus()# Get the selected item
-        content = clipboardHistory.history[selected_item]['content'] # Extract the "content" value
+        selected_item = tree.focus()  # Get the selected item
+        content = clipboardHistory.history[selected_item]['content']  # Extract the "content" value
         textfield.delete("1.0", tk.END)
         textfield.insert(tk.END, content)
-
 
     window = tk.Toplevel()
     # Create a Treeview widget
@@ -43,21 +44,22 @@ def display_history():
     tree.heading("#0", text="Time")
     tree.heading("type", text="Type")
     tree.heading("content", text="Content")
-    history=clipboardHistory.history
+    history = clipboardHistory.history
+
     # Insert the data from the history dictionary
     def readItems():
         for time, data in history.items():
-            cont=''
+            cont = ''
             if len(data["content"]) < 25:
                 cont = data["content"]
             else:
                 for s in range(len(data["content"])):
-                    if data["content"][s] !="\n":
-                        cont=data["content"][s:s+100]
-                        cont=cont.replace("\n","-")
+                    if data["content"][s] != "\n":
+                        cont = data["content"][s:s + 100]
+                        cont = cont.replace("\n", "-")
                         break
             if time not in tree.get_children():
-                item = tree.insert("", "end",time, text=time,values=(data["type"], cont))
+                item = tree.insert("", "end", time, text=time, values=(data["type"], cont))
 
     readItems()
     # Adjust column widths
@@ -66,53 +68,52 @@ def display_history():
     tree.column("content", width=400)
     fr = tk.Frame(window)
     text_field = tk.Text(window, height=4)
-    but = tk.Button(fr, text="⟳",width=4, command=readItems)
-    but.pack(anchor="center",expand=1)
-    copycont = tk.Button(fr, text="⎘",width=4,command=copycontent)
-    copycont.pack(anchor="center",expand=1)
-    window.columnconfigure(0,weight=1)
-    window.columnconfigure(1,weight=10)
-    fr.grid(row=0,column=0,sticky='EW')
-    tree.grid(row=0,column=1,sticky='ew')
-    text_field.grid(row=1,column=0,columnspan=2,sticky='ew')
+    but = tk.Button(fr, text="⟳", width=4, command=readItems)
+    but.pack(anchor="center", expand=1)
+    copycont = tk.Button(fr, text="⎘", width=4, command=copycontent)
+    copycont.pack(anchor="center", expand=1)
+    window.columnconfigure(0, weight=1)
+    window.columnconfigure(1, weight=10)
+    fr.grid(row=0, column=0, sticky='EW')
+    tree.grid(row=0, column=1, sticky='ew')
+    text_field.grid(row=1, column=0, columnspan=2, sticky='ew')
     tree.bind("<<TreeviewSelect>>", lambda ev: display_full_text(text_field))
     tree.tag_configure("multiline")
+
 
 def interFace():
     window = tk.Tk()
     window.title("Function Launcher")
 
     # Create IP address label and input field
-    entrygrid=tk.Frame(window)
+    entrygrid = tk.Frame(window)
     entrygrid.pack(expand=False)
 
     ip_label = tk.Label(entrygrid, text="IP address:")
-    ip_label.grid(row=0,column=0,sticky='W')
-
+    ip_label.grid(row=0, column=0, sticky='W')
 
     ip_entry = tk.Entry(entrygrid)
-    #ip_entry.insert(0, '04:7F:0E:7D:D0:D9')  # Default IP address
+    # ip_entry.insert(0, '04:7F:0E:7D:D0:D9')  # Default IP address
 
     ip_entry.insert(0, "D0:39:57:F1:E7:92")  # Default IP address
-    ip_entry.grid(row=0,column=1)
+    ip_entry.grid(row=0, column=1)
     portlabel = tk.Label(entrygrid, text="port:")
-    portlabel.grid(row=1,column=0,sticky='W')
+    portlabel.grid(row=1, column=0, sticky='W')
 
     port_entry = tk.Entry(entrygrid)
     port_entry.insert(0, "8")  # Default IP address
-    port_entry.grid(row=1,column=1)
+    port_entry.grid(row=1, column=1)
 
     host_var = tk.BooleanVar()
     host_checkbox = tk.Checkbutton(entrygrid, variable=host_var)
-    #host_checkbox.pack()
-    host_label=tk.Label(entrygrid,text="Host:")
-    host_label.grid(row=2,column=0,sticky='W')
-    host_checkbox.grid(row=2,column=1,sticky='W')
+    # host_checkbox.pack()
+    host_label = tk.Label(entrygrid, text="Host:")
+    host_label.grid(row=2, column=0, sticky='W')
+    host_checkbox.grid(row=2, column=1, sticky='W')
     start_button = tk.Button(window, text="Start",
                              command=lambda: run(ip_entry.get(), host_var.get(), int(port_entry.get())))
 
     start_button.pack()
-
 
     name_var = tk.StringVar()
     name_var.set("not Connected")
@@ -132,7 +133,7 @@ def interFace():
     def filedialogHanler():
         dir = filedialog.askdirectory()
         folder_path.set(dir)
-        pubsub.events["dir"]=[dir]
+        pubsub.events["dir"] = [dir]
 
     menu_bar = tk.Menu(window)
     window.config(menu=menu_bar)
@@ -147,14 +148,14 @@ def interFace():
     mapitems.columnconfigure((0, 1), weight=1)
     mapitems.pack(expand=False)
     lbl1 = tk.Entry(master=mapitems, textvariable=folder_path)
-    open= tk.Button(mapitems,text="→", command=lambda :subprocess.Popen(r'explorer /select,"{}"'.format(folder_path.get())))
+    open = tk.Button(mapitems, text="→",
+                     command=lambda: subprocess.Popen(r'explorer /select,"{}"'.format(folder_path.get())))
 
-    lbl1.grid(row=0,column=0,columnspan=7)
-    open.grid(row=0, column=7,sticky="we")
-
+    lbl1.grid(row=0, column=0, columnspan=7)
+    open.grid(row=0, column=7, sticky="we")
 
     copy_button = tk.Button(window, text="copy File from clipboard",
-                            command=lambda :pubsub.invoke("copyfileclip"))
+                            command=lambda: pubsub.invoke("copyfileclip"))
 
     copy_button.pack()
     not_var = tk.StringVar()
@@ -166,11 +167,10 @@ def interFace():
     pubsub.setEvent('recieved', lambda: not_var.set("File Recieved at " + datetime.now().strftime("%H:%M:%S")))
     pubsub.setEvent('sending', lambda: not_var.set("Sending File"))
     pubsub.setEvent('sended', lambda: not_var.set("sended at" + datetime.now().strftime("%H:%M:%S")))
-    
+ 
     """
     window.mainloop()
     on_closing()
-
 
 
 def on_closing():
@@ -178,45 +178,37 @@ def on_closing():
         f()
 
 
-
-
 def run(ip, host, port):
     s, conn = None, None
     tracemalloc.start()
     ConnectionClient = client.client()
+
     def wr():
-        if host:
-            s = Server.socketServer(ip, port, wait=True)
-            s.connectionListener()
-            #closefunc.append(s.stopServer)
-            #t = threading.Thread(target=lambda: connectionhandler(s, lambda :shareClyp.shareClyp(textClient)))
-            #t.start()
-        else:
-            conn = Server.connect(ip, port)
-            ConnectionClient.setConnection(conn)
+        gett = lambda: datetime.now().strftime("%H:%M:%S")
+        conn = None
+        noConnection = True
+
+        def wr():
+            while noConnection:
+                if host:
+                    conn = Server.serverConnectHandler(port)
+                else:
+                    conn = Server.clientConnectHandler()
+                try:
+                    conn.send(f"{'Host' if host else 'client'} has successfully connected to {host}:{port}")
+                    if conn is not None:
+                        noConnection = False
+                        print(f'{gett()} succ connection.')
+                except Exception as e:
+                    print(f'{gett()} somting whent wrong', e)
+
         sc = shareClyp.shareClyp(ConnectionClient)
         closefunc.append(ConnectionClient.connection.close)
-
 
     t = threading.Thread(target=wr)
     t.start()
 
 
-def connectionhandler(s, initf):
-    while True:
-        if len(s.getClientConnection()) > 1:
-            shclyp = initf()
-            items['name_var'].set("Connected")
-            break
-        elif len(s.getClientConnection()) <= 1:
-            items['name_var'].set("Connecting")
-            time.sleep(0.5)
-
-    # except:
-    #   if s.getConnection()|(fileServer.getConnection()):
-    #      s.getConnection().close()
-    #     fileServer.getConnection().close()
-
-
 if __name__ == "__main__":
     interFace()
+

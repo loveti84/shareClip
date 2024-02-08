@@ -41,13 +41,12 @@ def l(s):
         data = s.recv(1024)
         print("Received:", data.decode())
 
-
-
-target_address = "D0:39:57:F1:E7:92"
 target_address = "04:7F:0E:7D:D0:D9"
+target_address = "D0:39:57:F1:E7:92"
 
 
-s=server(target_address.lower(),12)
+
+s=client(target_address.lower(),10)
 t=threading.Thread(target=lambda :l(s))
 t.start()
 c=0
