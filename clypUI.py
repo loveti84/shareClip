@@ -170,15 +170,14 @@ def interFace():
     
     """
     window.mainloop()
+    on_closing()
 
 
 
-
-def on_closing(root):
+def on_closing():
     for f in closefunc:
         f()
-    print("r")
-    root.destroy()
+
 
 
 
@@ -195,23 +194,11 @@ def run(ip, host, port):
         #t = threading.Thread(target=lambda: connectionhandler(s, lambda :shareClyp.shareClyp(textClient)))
         #t.start()
     else:
-        while True:
-            try:
-                conn = Server.connect("", port)
-                ok=ConnectionClient.setConnection(conn)
-                if ok:
-                    items['name_var'].set("Connected")
-                    break
-                else:
-                    print('failed,again')
-            except:
-                print("cant connect with the server")
+        conn = Server.connect(ip, port)
+        ok=ConnectionClient.setConnection(conn)
 
-        items['name_var'].set("Connected")
-        sc=shareClyp.shareClyp(ConnectionClient)
-        #fc=fileSender.filesender(fileClient)
-        #closefunc.append(textClient1.close)
-        #closefunc.append(fileClient.close)
+    sc=shareClyp.shareClyp(ConnectionClient)
+    closefunc.append(ConnectionClient.connection.close)
 
 def connectionhandler(s, initf):
     while True:

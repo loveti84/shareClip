@@ -44,7 +44,7 @@ def connect(ip,port)->socket.socket():
         while 1:
             try:
                 sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM,socket.BTPROTO_RFCOMM)
-                sock.connect(("", port))
+                sock.connect((ip, port))
                 print("client connected")
 
                 break

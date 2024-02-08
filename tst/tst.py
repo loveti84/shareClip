@@ -9,7 +9,7 @@ def client(target_address,port):
 
     # Create a Bluetooth socket
     client_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    client_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+    #client_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
     client_socket.connect((target_address, port))
 
@@ -25,9 +25,9 @@ def server(target_address,port):
     # Create a Bluetooth socket
 
     server_socket=bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-    server_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+    #server_socket = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
 
-    server_socket.bind(("", port))
+    server_socket.bind(('', port))
     server_socket.listen(1)
 
     client_socket, address = server_socket.accept()
@@ -45,8 +45,8 @@ def l(s):
 
 
 target_address = "04:7F:0E:7D:D0:D9"
-target_address = "D0:39:57:F1:E7:92"
 
+target_address = "D0:39:57:F1:E7:92"
 
 
 s=client(target_address.lower(),8)
@@ -56,5 +56,8 @@ c=0
 while 1:
     i=f"test{c}"
     time.sleep(1)
-    c=+1
-    s.send(i.encode())
+    c+=1
+    s.send(i)
+    if c<3:
+        break
+s.close()
