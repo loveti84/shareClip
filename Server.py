@@ -44,7 +44,7 @@ class socketServer:
         self.connection=conn
         print('end')
 
-def initiqte(ip,PORT):
+def serverConnectHandler(ip,PORT):
     server_socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
     server_socket.bind(('', PORT))
     server_socket.listen(1)
@@ -57,7 +57,7 @@ def initiqte(ip,PORT):
             break
     return conn
 
-def connect(ip,port)->bluetooth.BluetoothSocket():
+def clientConnectHandler(ip,port)->bluetooth.BluetoothSocket():
         while 1:
             try:
                 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)

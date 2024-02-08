@@ -185,23 +185,22 @@ def run(ip, host, port):
 
     def wr():
         gett = lambda: datetime.now().strftime("%H:%M:%S")
-        conn = None
         noConnection = True
+        conn=None
+        while noConnection:
+            if host:
+                conn = Server.serverConnectHandler(ip,port)
+            else:
+                conn = Server.clientConnectHandler(ip,port)
+            try:
+                conn.send(f"{'Host' if host else 'client'} has successfully connected to {host}:{port}")
+                if conn is not None:
+                    noConnection = False
+                    print(f'{gett()} succ connection.')
+            except Exception as e:
+                print(f'{gett()} somting whent wrong', e)
 
-        def wr():
-            while noConnection:
-                if host:
-                    conn = Server.serverConnectHandler(port)
-                else:
-                    conn = Server.clientConnectHandler()
-                try:
-                    conn.send(f"{'Host' if host else 'client'} has successfully connected to {host}:{port}")
-                    if conn is not None:
-                        noConnection = False
-                        print(f'{gett()} succ connection.')
-                except Exception as e:
-                    print(f'{gett()} somting whent wrong', e)
-
+        ConnectionClient.setConnection(conn)
         sc = shareClyp.shareClyp(ConnectionClient)
         closefunc.append(ConnectionClient.connection.close)
 
