@@ -14,7 +14,6 @@ class socketServer:
         self.port=PORT
         self.startServer(SERVER_IP, PORT)
         self.loop=True
-        self.thread=self.runningserver()
         self.status="init"
         self.connection=None
         return

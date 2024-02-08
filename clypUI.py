@@ -124,7 +124,6 @@ def interFace():
     emp.pack()
 
     items['name_var'] = name_var
-    window.protocol("WM_DELETE_WINDOW", lambda :on_closing(window))
 
     folder_path = tk.StringVar()
     folder_path.set(os.getcwd())
@@ -185,17 +184,20 @@ def run(ip, host, port):
     s, conn = None, None
     tracemalloc.start()
     ConnectionClient = client.client()
+    def wr():
+        if host:
+            s = Server.socketServer(ip, port, wait=True)
+            s.connectionListener()
+            ConnectionClient.setConnection(s.connection)
+            #closefunc.append(s.stopServer)
+            #t = threading.Thread(target=lambda: connectionhandler(s, lambda :shareClyp.shareClyp(textClient)))
+            #t.start()
+        else:
+            conn = Server.connect(ip, port)
+            ok=ConnectionClient.setConnection(conn)
 
-    if host:
-        s = Server.socketServer(ip, port, wait=True)
-        pubsub.addPublisher(Event.CONNECTED)
-        pubsub.setEvent(Event.CONNECTED,lambda : ConnectionClient.setConnection(s.connection))
-        #closefunc.append(s.stopServer)
-        #t = threading.Thread(target=lambda: connectionhandler(s, lambda :shareClyp.shareClyp(textClient)))
-        #t.start()
-    else:
-        conn = Server.connect(ip, port)
-        ok=ConnectionClient.setConnection(conn)
+    t = threading.Thread(target=wr)
+    t.start()
 
     sc=shareClyp.shareClyp(ConnectionClient)
     closefunc.append(ConnectionClient.connection.close)

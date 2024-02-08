@@ -1,4 +1,4 @@
-
+import threading
 
 events={}
 def createEvent(name):
@@ -10,12 +10,18 @@ def setEvent(name,*args):
         events[name]=list(args)
 
 
+def launchOnThread(func,callback):
+    t = threading.Thread(target=func)
+    t.start()
+
 def addPublisher(event,func,repeat=False):
-    while 1:
-        func()
-        invoke(event)
-        if not repeat:
-            break
+    def wr():
+        while 1:
+            func()
+            invoke(event)
+            if not repeat:
+                break
+
 
 def invoke(name,*args):
     dic={}
