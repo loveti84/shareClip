@@ -36,8 +36,12 @@ class socketServer:
             k.close()
         self.server_socket.close()
     def connectionListener(self):#server listen for client
+        while 1:
                 conn,adrr=self.server_socket.accept()
-                self.connection=conn
+                print(conn)
+                if conn:
+                    break
+        self.connection=conn
 
 def connect(ip,port)->bluetooth.BluetoothSocket():
         while 1:
@@ -45,8 +49,10 @@ def connect(ip,port)->bluetooth.BluetoothSocket():
                 sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
                 sock.connect((ip, port))
                 print("client connected")
-
-                break
+                if sock:
+                    break
+                else:
+                    print("Could Establish connection with server, trying again")
             except:
                 print("Could Establish connection with server, trying again")
         return sock

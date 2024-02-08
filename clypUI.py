@@ -188,19 +188,19 @@ def run(ip, host, port):
         if host:
             s = Server.socketServer(ip, port, wait=True)
             s.connectionListener()
-            ConnectionClient.setConnection(s.connection)
             #closefunc.append(s.stopServer)
             #t = threading.Thread(target=lambda: connectionhandler(s, lambda :shareClyp.shareClyp(textClient)))
             #t.start()
         else:
             conn = Server.connect(ip, port)
-            ok=ConnectionClient.setConnection(conn)
+            ConnectionClient.setConnection(conn)
+        sc = shareClyp.shareClyp(ConnectionClient)
+        closefunc.append(ConnectionClient.connection.close)
+
 
     t = threading.Thread(target=wr)
     t.start()
 
-    sc=shareClyp.shareClyp(ConnectionClient)
-    closefunc.append(ConnectionClient.connection.close)
 
 def connectionhandler(s, initf):
     while True:
