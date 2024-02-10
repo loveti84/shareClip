@@ -16,7 +16,7 @@ import Server
 import shareClyp
 from pynput import keyboard
 import fileSender, pubsub
-
+import var
 folder_path = None
 items = {}
 closefunc = []
@@ -128,12 +128,11 @@ def interFace():
 
     folder_path = tk.StringVar()
     folder_path.set(os.getcwd())
-    pubsub.events["dir"] = [folder_path.get()]
-
+    var.PATH = folder_path.get()
     def filedialogHanler():
         dir = filedialog.askdirectory()
         folder_path.set(dir)
-        pubsub.events["dir"] = [dir]
+        var.PATH =dir
 
     menu_bar = tk.Menu(window)
     window.config(menu=menu_bar)
@@ -155,20 +154,20 @@ def interFace():
     open.grid(row=0, column=7, sticky="we")
 
     copy_button = tk.Button(window, text="copy File from clipboard",
-                            command=lambda: pubsub.invoke("copyfileclip"))
+                            command=lambda: pubsub.publish(Event.COPYFILE))
 
     copy_button.pack()
     not_var = tk.StringVar()
     not_var.set("")
     not_label = tk.Label(window, textvariable=not_var)
     not_label.pack()
-    """
-    pubsub.setEvent('recieving', lambda: not_var.set("Recieving File"))
-    pubsub.setEvent('recieved', lambda: not_var.set("File Recieved at " + datetime.now().strftime("%H:%M:%S")))
-    pubsub.setEvent('sending', lambda: not_var.set("Sending File"))
-    pubsub.setEvent('sended', lambda: not_var.set("sended at" + datetime.now().strftime("%H:%M:%S")))
+
+    pubsub.addListeners(Event.RECIEVING, lambda: not_var.set("Recieving File"))
+    pubsub.addListeners(Event.RECIEVED, lambda: not_var.set("File Recieved at " + datetime.now().strftime("%H:%M:%S")))
+    pubsub.addListeners(Event.SENDING, lambda: not_var.set("Sending File"))
+    pubsub.addListeners(Event.SENDED, lambda: not_var.set("sended at" + datetime.now().strftime("%H:%M:%S")))
  
-    """
+
     window.mainloop()
     on_closing()
 

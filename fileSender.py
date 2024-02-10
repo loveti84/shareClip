@@ -5,10 +5,10 @@ import win32clipboard
 import win32con
 import socket
 import threading
-
+import var
 import pubsub
+import event
 import clipboardHistory
-event=threading.Event()
 lock = threading.Lock()
 DEBUG=False
 import socket
@@ -33,7 +33,7 @@ class filesender:
                     try:
                         content = content.decode()
                         path=content.split("/")[-1]
-                        loc = pubsub.events["dir"][0]
+                        loc = var.PATH
                         print(loc + "/" + path)
                         f = open(loc + "/" + path, "wb")
                         print("Revieving")
@@ -96,7 +96,7 @@ class filesender:
             recT.start()
            # queT = threading.Thread(target=self.que)
             #queT.start()
-            pubsub.setEvent("copyfileclip",self.send)
+            pubsub.addListeners(event.Event.SENDFILEREQUEST, self.send)
     def get_file_path_from_clipboard(self):
         win32clipboard.OpenClipboard()
         try:

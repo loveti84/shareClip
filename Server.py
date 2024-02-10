@@ -27,8 +27,6 @@ class socketServer:
         self.server_socket.listen(1)
         self.setstatus("listening")
 
-    def getClientConnection(self):
-        return self.connections.keys()
 
 
     def stopServer(self):
