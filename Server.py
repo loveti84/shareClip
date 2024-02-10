@@ -30,8 +30,7 @@ class socketServer:
 
 
     def stopServer(self):
-        for k in self.connections.keys():
-            k.close()
+        self.connection.close()
         self.server_socket.close()
     def connectionListener(self):#server listen for client
         while 1:

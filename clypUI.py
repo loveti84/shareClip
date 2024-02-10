@@ -7,8 +7,12 @@ import tracemalloc
 from datetime import datetime
 from tkinter import filedialog
 from tkinter import ttk
+from tkinter import messagebox
 
+import bluetooth
 import pyperclip
+
+import event
 from event import Event
 import clipboardHistory
 import client
@@ -20,6 +24,24 @@ import var
 folder_path = None
 items = {}
 closefunc = []
+
+
+def display_devices():
+
+    def searchDevices(tree):
+        dev=bluetooth.discover_devices(lookup_names=True)
+        for d in dev:
+            tree.insert("", "end", text=d[1], values=(d[0]))
+
+    # Create a new window
+    window = tk.Toplevel()
+    # Create a Treeview widget
+    tree = ttk.Treeview(window)
+    tree["columns"] = ("Name", "address")
+    # Define the column headings
+    tree.heading("#0", text="Time")
+    tree.heading("type", text="Type")
+    tree.heading("content", text="Content")
 
 
 def display_history():
@@ -81,6 +103,7 @@ def display_history():
     tree.tag_configure("multiline")
 
 
+
 def interFace():
     window = tk.Tk()
     window.title("Function Launcher")
@@ -124,7 +147,6 @@ def interFace():
     emp = tk.Label(window)
     emp.pack()
 
-    items['name_var'] = name_var
 
     folder_path = tk.StringVar()
     folder_path.set(os.getcwd())
@@ -166,10 +188,11 @@ def interFace():
     pubsub.addListeners(Event.RECIEVED, lambda: not_var.set("File Recieved at " + datetime.now().strftime("%H:%M:%S")))
     pubsub.addListeners(Event.SENDING, lambda: not_var.set("Sending File"))
     pubsub.addListeners(Event.SENDED, lambda: not_var.set("sended at" + datetime.now().strftime("%H:%M:%S")))
- 
-
+    pubsub.addListeners(Event.CONNECTED, lambda: name_var.set("connected with client"))
+    pubsub.addListeners(Event.CONNECTING, lambda: name_var.set("Waiting for client"))
+    pubsub.addPublisher(Event.CLOSE)
     window.mainloop()
-    on_closing()
+    pubsub.publish(Event.CLOSE,wait=True)
 
 
 def on_closing():
@@ -201,7 +224,7 @@ def run(ip, host, port):
 
         ConnectionClient.setConnection(conn)
         sc = shareClyp.shareClyp(ConnectionClient)
-        closefunc.append(ConnectionClient.connection.close)
+        pubsub.addListeners(event.Event.CLOSE,ConnectionClient.connection.close)
 
     t = threading.Thread(target=wr)
     t.start()

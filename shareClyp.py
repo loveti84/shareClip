@@ -19,15 +19,20 @@ class shareClyp:
         self.run()
         self.currentClip=''
 
-
+    def revievHandler(self):
+        try:
+            content=self.connection.recv(1024).decode()
+            return content
+        except Exception as e:
+            clipboardHistory.addLog('Error',str(e))
 
     def rec(self):
         while True:
-            content=self.connection.recv(1024).decode()
+            content=self.revievHandler()
             st = ''
             if content=="n-@@@@largestring-@@@@n":
                 while True:
-                    content=self.connection.recv(1024).decode()
+                    content=self.revievHandler()
                     x=content
                     if "end"==x:
                         break
@@ -43,6 +48,8 @@ class shareClyp:
         if txt != self.currentClip:
             pyperclip.copy(txt)
             self.currentClip=txt
+            print("New paste")
+            clipboardHistory.addLog("Pasted", txt)
             return True
         return False
 
@@ -60,14 +67,12 @@ class shareClyp:
                 x=str
             else:
                 x=pyperclip.waitForNewPaste()
-                print("New paste")
-            if(self.setClipboard(x)):
+            if self.setClipboard(x):
                 if len(x)>=1024:
                     self.sendlargestr(x)
                 else:
                     self.currentClip=x
                     self.connection.send(x.encode())
-                clipboardHistory.addLog("Pasted", x)
 
     def close(self):
         self.loop=True

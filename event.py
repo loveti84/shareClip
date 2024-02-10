@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Event(Enum):
-    WAIT = 1
+    CONNECTING = 1
     CONNECTED = 2
     DISCONNECTED = 3
     COPYFILE=4
@@ -11,3 +11,5 @@ class Event(Enum):
     SENDING=7
     SENDED=8
     SENDFILEREQUEST=9
+    ERROR=10
+    CLOSE=11
