@@ -17,6 +17,7 @@ class shareClyp:
         self.connection =client.connection
         self.loop=True
         self.run()
+        self.currentClip=''
 
 
 
@@ -53,11 +54,13 @@ class shareClyp:
             else:
                 x=pyperclip.waitForNewPaste()
                 print("New paste")
-            if len(x)>=1024:
-                self.sendlargestr(x)
-            else:
-                self.connection.send(x.encode())
-            clipboardHistory.addLog("Pasted", x)
+            if(x != self.currentClip):
+                if len(x)>=1024:
+                    self.sendlargestr(x)
+                else:
+                    self.currentClip=x
+                    self.connection.send(x.encode())
+                clipboardHistory.addLog("Pasted", x)
 
     def close(self):
         self.loop=True

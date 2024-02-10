@@ -46,7 +46,7 @@ target_address = "D0:39:57:F1:E7:92"
 
 
 
-s=client(target_address.lower(),10)
+s=server(target_address.lower(),12)
 t=threading.Thread(target=lambda :l(s))
 t.start()
 c=0
