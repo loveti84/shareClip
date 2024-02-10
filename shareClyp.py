@@ -36,9 +36,16 @@ class shareClyp:
             if DEBUG:
                 print(content)
             else:
-                pyperclip.copy(content)
+                self.setClipboard(content)
                 print("clipboard recieved")
             clipboardHistory.addLog("recieved", content)
+    def setClipboard(self,txt):
+        if txt != self.currentClip:
+            pyperclip.copy(txt)
+            self.currentClip=txt
+            return True
+        return False
+
 
     def paste(self):
         while True:
@@ -54,7 +61,7 @@ class shareClyp:
             else:
                 x=pyperclip.waitForNewPaste()
                 print("New paste")
-            if(x != self.currentClip):
+            if(self.setClipboard(x)):
                 if len(x)>=1024:
                     self.sendlargestr(x)
                 else:
