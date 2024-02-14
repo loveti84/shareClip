@@ -122,7 +122,6 @@ def interFace():
     ip_entry.grid(row=0, column=1)
     portlabel = tk.Label(entrygrid, text="port:")
     portlabel.grid(row=1, column=0, sticky='W')
-
     port_entry = tk.Entry(entrygrid)
     port_entry.insert(0, "8")  # Default IP address
     port_entry.grid(row=1, column=1)
@@ -133,8 +132,17 @@ def interFace():
     host_label = tk.Label(entrygrid, text="Host:")
     host_label.grid(row=2, column=0, sticky='W')
     host_checkbox.grid(row=2, column=1, sticky='W')
+
+    log_var = tk.BooleanVar()
+    host_checkbox = tk.Checkbutton(entrygrid, variable=log_var)
+    # host_checkbox.pack()
+    host_label = tk.Label(entrygrid, text="Log clipboard:")
+    host_label.grid(row=3, column=0, sticky='W')
+    host_checkbox.grid(row=3, column=1, sticky='W')
+
+
     start_button = tk.Button(window, text="Start",
-                             command=lambda: run(ip_entry.get(), host_var.get(), int(port_entry.get())))
+                             command=lambda: run(ip_entry.get(), host_var.get(), int(port_entry.get()),log_var.get()))
 
     start_button.pack()
 
@@ -146,8 +154,6 @@ def interFace():
 
     emp = tk.Label(window)
     emp.pack()
-
-
     folder_path = tk.StringVar()
     folder_path.set(os.getcwd())
     var.PATH = folder_path.get()
@@ -164,6 +170,8 @@ def interFace():
     # Add the Browse option
     file_menu.add_command(label="Browse", command=filedialogHanler)
     file_menu.add_command(label="See History", command=display_history)
+    file_menu.add_command(label="Find Devices", command=lambda :show_treeview_window(window,ip_entry))
+
 
     mapitems = tk.Frame(window)
     mapitems.columnconfigure((0, 1), weight=1)
@@ -188,11 +196,53 @@ def interFace():
     pubsub.addListeners(Event.RECIEVED, lambda: not_var.set("File Recieved at " + datetime.now().strftime("%H:%M:%S")))
     pubsub.addListeners(Event.SENDING, lambda: not_var.set("Sending File"))
     pubsub.addListeners(Event.SENDED, lambda: not_var.set("sended at" + datetime.now().strftime("%H:%M:%S")))
-    pubsub.addListeners(Event.CONNECTED, lambda: name_var.set("connected with client"))
-    pubsub.addListeners(Event.CONNECTING, lambda: name_var.set("Waiting for client"))
+    pubsub.addListeners(Event.CONNECTED, lambda: name_var.set("connected"))
+    pubsub.addListeners(Event.CONNECTING, lambda: name_var.set("Waiting for connection"))
+    pubsub.addListeners(Event.NOTCONNECTED, lambda: name_var.set("Not connected"))
+    pubsub.addListeners(Event.NOTIFICATION, lambda e: not_var.set(e))
+
+
     pubsub.addPublisher(Event.CLOSE)
     window.mainloop()
     pubsub.publish(Event.CLOSE,wait=True)
+
+
+def show_treeview_window(root,varToSet):
+    pubsub.publish(Event.NOTIFICATION,"Searching for device",wait=True)
+    def wr():
+
+        # Discover Bluetooth devices
+        dev = bluetooth.discover_devices(lookup_names=True)
+        treeview_window = tk.Toplevel(root)
+        treeview_window.title("Treeview Window")
+        def ondestroy():
+            pubsub.publish(Event.NOTIFICATION, "")
+            treeview_window.destroy()
+        treeview_window.protocol("WM_DELETE_WINDOW",ondestroy)
+        pubsub.publish(Event.NOTIFICATION,"Wait for selection",wait=True)
+        # Create a Treeview widget
+        treeview = ttk.Treeview(treeview_window, columns=("name",))
+        treeview.heading("#0", text="Address")
+        treeview.heading("name", text="Name")
+
+        for address, name in dev:
+            treeview.insert("", tk.END, text=address, values=(name,))
+
+        treeview.pack(expand=True, fill=tk.BOTH)
+        def select_item(var):
+            selected_item = treeview.focus()  # Get the selected item
+            if selected_item:
+                selected_address = treeview.item(selected_item, "text")  # Get the text of the selected item
+                var.insert(0,selected_address)  # Set the selected address to the variable
+                var.delete(0, tk.END)
+                var.insert(0, selected_address)
+                treeview_window.destroy()  # Close the window
+
+        select_button = tk.Button(treeview_window, text="Select", command=lambda: select_item(varToSet))
+        select_button.pack()
+
+    t=threading.Thread(target=wr)
+    t.start()
 
 
 def on_closing():
@@ -200,7 +250,8 @@ def on_closing():
         f()
 
 
-def run(ip, host, port):
+def run(ip, host, port,log):
+    clipboardHistory.log=log
     s, conn = None, None
     tracemalloc.start()
     ConnectionClient = client.client()
@@ -211,6 +262,8 @@ def run(ip, host, port):
         conn=None
         while noConnection:
             if host:
+                pubsub.publish(event.Event.CONNECTING)
+
                 conn = Server.serverConnectHandler(ip,port)
             else:
                 conn = Server.clientConnectHandler(ip,port)
@@ -222,6 +275,7 @@ def run(ip, host, port):
             except Exception as e:
                 print(f'{gett()} somting whent wrong', e)
 
+        pubsub.publish(event.Event.CONNECTED)
         ConnectionClient.setConnection(conn)
         sc = shareClyp.shareClyp(ConnectionClient)
         pubsub.addListeners(event.Event.CLOSE,ConnectionClient.connection.close)

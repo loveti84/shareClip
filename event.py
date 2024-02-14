@@ -13,3 +13,5 @@ class Event(Enum):
     SENDFILEREQUEST=9
     ERROR=10
     CLOSE=11
+    NOTIFICATION = 12
+    NOTCONNECTED=13
